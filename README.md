@@ -13,7 +13,7 @@ Auto-detect **"incorrect region header"** in 7 Days To Die dedicated server logs
 
 1. **Clone the repo**
    ```bash
-   git clone <https://github.com/248Tech/RegionHealer-v2> RegionHealer-v2 && cd RegionHealer-v2
+   git clone https://github.com/248Tech/RegionHealer-v2 RegionHealer-v2 && cd RegionHealer-v2
    ```
 
 2. **Create config from template**  
