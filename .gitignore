@@ -1,0 +1,7 @@
+# RegionAutoFix - do not commit secrets or local config
+RegionAutoFix/config.env
+
+# Optional: ignore local state/logs if you don't want them in version control
+# RegionAutoFix/Logs/
+# RegionAutoFix/Saves/
+# RegionAutoFix/State/
