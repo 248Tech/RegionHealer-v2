@@ -1,10 +1,16 @@
-# common.sh - timestamp, log, die, ensure_dirs, state helpers, list_snapshots, safe_realpath
+# common.sh - timestamp, log, die, ensure_dirs, state helpers, list_snapshots, safe_realpath, startup helpers
+
+REGIONAUTOFIX_VERSION="1.0.1"
 
 timestamp() {
   date '+%Y-%m-%d %H:%M:%S'
 }
 
 epoch() {
+  date '+%s'
+}
+
+now_epoch() {
   date '+%s'
 }
 
@@ -93,3 +99,54 @@ validate_region_filename() {
 
 # Resolve region_dir from worldsave (must be set by caller)
 # region_dir="$worldsave/Region"
+
+# Sanitize path for display: show last 2 segments or basename, replace $HOME with ~
+sanitize_path() {
+  local path="${1:-}"
+  [[ -z "$path" ]] && echo "(not set)" && return
+  local home="${HOME:-}"
+  if [[ -n "$home" && "$path" == "$home"/* ]]; then
+    path="~/${path#$home/}"
+  fi
+  local base1 base2
+  base1=$(basename "$path")
+  base2=$(basename "$(dirname "$path")")
+  if [[ "$base1" == "$base2" ]]; then
+    echo "$base1"
+  else
+    echo "$base2/$base1"
+  fi
+}
+
+# Derive world/save name from worldsave path (e.g. .../Saves/WorldName/WorldName -> WorldName)
+get_world_name() {
+  local ws="${1:-$worldsave}"
+  [[ -z "$ws" ]] && echo "(not set)" && return
+  local name
+  name=$(basename "$ws")
+  local parent
+  parent=$(dirname "$ws")
+  if [[ -n "$parent" && "$(basename "$parent")" == "$name" ]]; then
+    echo "$name"
+  else
+    echo "$name"
+  fi
+}
+
+# Safe git commit: print short HEAD if git and repo available, else "unknown"
+get_git_commit() {
+  local repo_root="${1:-$BASE}"
+  if ! command -v git &>/dev/null; then
+    echo "unknown"
+    return
+  fi
+  local try
+  for try in "$repo_root" "$(dirname "$repo_root")"; do
+    [[ -z "$try" ]] && continue
+    if git -C "$try" rev-parse --is-inside-work-tree &>/dev/null; then
+      git -C "$try" rev-parse --short HEAD 2>/dev/null || echo "unknown"
+      return
+    fi
+  done
+  echo "unknown"
+}

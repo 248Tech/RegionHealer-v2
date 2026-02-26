@@ -13,7 +13,7 @@
 - **Restore** the corrupt region from the newest backup; if the same region fails again, escalation uses the next-older snapshot (depth tracked in state).
 - **Quarantine** the live corrupt file to `State/quarantine/` before overwriting.
 - **Restart** server via `startcmd` or best-effort `systemctl`/`service`.
-- **Optional Discord** webhook notifications (disabled if `webhook` is empty).
+- **Optional Discord** webhook notifications (disabled if `webhook` is empty), including a **one-time startup message** (hostname, timestamp, world name, log/backup paths, dry_run, version) with an optional cooldown to avoid spam on rapid restarts.
 - **Optional telnet heartbeat** when log has been idle > 120s; rate-limited Discord message for heartbeat.
 - **Scheduled backups**: Region-only snapshots every `savetime` minutes, with retention of newest `savecount` snapshots.
 - **State persistence** across restarts: last log activity, last backup time, restore depth per region, lock file.
@@ -41,6 +41,7 @@ RegionAutoFix/
   State/              # Persisted state
     last_log_activity.ts
     last_backup.ts
+    last_startup_announce.ts  # epoch of last startup Discord message (cooldown)
     region_restore_depth.tsv   # region filename TAB depth
     restore.lock               # flock file for restore
     quarantine/                # Copies of corrupt files before overwrite
@@ -107,8 +108,10 @@ All keys are shell-compatible `key="value"` in `config.env`. Derived path: **`re
 | `telnet_password` | Optional: telnet admin password | `""` or `"mypass"` |
 | `telnet_timeout` | nc timeout in seconds (2–5) | `"5"` |
 | `dry_run` | If `"true"`: no stop/start/kill, no file overwrite; still logs and Discord | `"false"` |
+| `startup_announce_cooldown` | Seconds between startup Discord announcements (avoid spam on rapid restarts); default 300 | `"300"` |
 
 - **Discord**: If `webhook` is empty, `discord_send` is a no-op.
+- **Startup announcement**: On start, if webhook is set, a one-time message is sent (hostname, timestamp, world name, sanitized log/backup paths, dry_run, version, git commit). Restarts within the cooldown do not send again.
 - **region_dir** is not set in config; it is derived as `"$worldsave/Region"`.
 
 ---
@@ -125,6 +128,8 @@ All keys are shell-compatible `key="value"` in `config.env`. Derived path: **`re
 - **State** is persisted in `State/`: `last_log_activity.ts`, `last_backup.ts`, `region_restore_depth.tsv`, `restore.lock`.
 
 **Dry run:** Set `dry_run="true"` in `config.env`. The tool will not stop/start/kill the server or overwrite region files; it will log what it would do and can still send Discord messages.
+
+**Startup message:** When the webhook is set, the tool sends a single Discord message after startup (config summary; no secrets). Use `startup_announce_cooldown` (seconds) to avoid duplicate messages if you restart frequently; default is 300.
 
 ---
 

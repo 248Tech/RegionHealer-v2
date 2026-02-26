@@ -1,8 +1,8 @@
-# RegionHealer-v2
+# RegionHealer-v1.0.1
 
 Auto-detect **"incorrect region header"** in 7 Days To Die dedicated server logs and auto-restore corrupt `.7rg` region files from backups.
 
-**RegionAutoFix** is the shell-first subtool in this repo: it tails the server log, detects corruption, stops the server safely, restores from the newest backup (with escalation to older backups on repeated failures), and restarts the server. Optional Discord webhooks and telnet heartbeats are supported.
+**RegionAutoFix** is the shell-first subtool in this repo: it tails the server log, detects corruption, stops the server safely, restores from the newest backup (with escalation to older backups on repeated failures), and restarts the server. Optional Discord webhooks (including a one-time startup announcement with config summary) and telnet heartbeats are supported.
 
 - **Shell-first**: Bash + coreutils, `tail`, `grep`, `awk`/`sed`, `flock`, `nc`, `curl`. Minimal dependencies.
 - **Linux target**: Runtime expects a Linux environment with these utilities. Development on Windows is fine; run the tool on the same host (or an accessible host) where the 7DTD server runs.

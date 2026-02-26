@@ -89,6 +89,7 @@ start_logging() {
   exec >"$LOG_FILE" 2>&1
   export LOG_FILE
   log "RegionAutoFix started (BASE=$BASE, dry_run=${dry_run:-false})"
+  discord_startup_announce || true
 }
 
 # --- Main ---
